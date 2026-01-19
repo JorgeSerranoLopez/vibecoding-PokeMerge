@@ -1,0 +1,5 @@
+{
+  "name": "PokeMerge Evolution",
+  "description": "A 2048-style merge game where you combine identical Pokémon to evolve them using Drag and Drop mechanics and the PokéAPI.",
+  "requestFramePermissions": []
+}
