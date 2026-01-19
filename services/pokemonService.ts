@@ -14,10 +14,14 @@ export const fetchPokemonData = async (id: number): Promise<PokemonData | null> 
     }
     const data = await response.json();
     
+    // Use the animated Generation V (Black/White) sprite if available, fallback to default
+    const animatedImage = data.sprites.versions['generation-v']['black-white'].animated.front_default;
+    const staticImage = data.sprites.front_default;
+
     const pokemon: PokemonData = {
       id: data.id,
       name: data.name,
-      image: data.sprites.front_default || '', // Fallback if no sprite
+      image: animatedImage || staticImage || '', 
     };
 
     cache.set(id, pokemon);

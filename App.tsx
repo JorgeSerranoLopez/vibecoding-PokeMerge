@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { EVOLUTION_RULES, SPAWNABLE_IDS, TOTAL_CELLS, SPAWN_INTERVAL_MS, POKEBALL_COST, INCOME_MAP } from './constants';
+import React, { useState, useEffect, useCallback } from 'react';
+import { EVOLUTION_RULES, SPAWNABLE_IDS, TOTAL_CELLS, POKEBALL_COST, INCOME_MAP } from './constants';
 import { GridItem } from './types';
 import { fetchPokemonData } from './services/pokemonService';
 import { GridCell } from './components/GridCell';
@@ -10,7 +10,7 @@ const App: React.FC = () => {
   const [evoStones, setEvoStones] = useState<number>(0);
   const [incomeRate, setIncomeRate] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [lastEvent, setLastEvent] = useState<string>("Welcome! Drag matching Pokémon to evolve.");
+  const [lastEvent, setLastEvent] = useState<string>("Welcome to the Ranch!");
   
   // Calculate income rate whenever grid changes
   useEffect(() => {
@@ -34,17 +34,13 @@ const App: React.FC = () => {
 
   const spawnPokemon = useCallback(async (isAuto = false) => {
     setGrid(currentGrid => {
-      // Find empty indices logic only to prepare state, actual fetch is below
+      // Find empty indices logic only to prepare state
       const emptyIndices = currentGrid
         .map((item, index) => (item === null ? index : -1))
         .filter(index => index !== -1);
 
       if (emptyIndices.length === 0) {
-        if (isAuto) {
-            // Silently fail for auto spawn if full
-            return currentGrid; 
-        }
-        // User action fail handled in caller or generic handling
+        if (isAuto) return currentGrid; 
         return currentGrid;
       }
       return currentGrid;
@@ -55,7 +51,7 @@ const App: React.FC = () => {
       .filter(index => index !== -1);
     
     if (emptyIndices.length === 0) {
-        if (!isAuto) setLastEvent("Grid is full!");
+        if (!isAuto) setLastEvent("Ranch is full!");
         return;
     }
 
@@ -71,26 +67,19 @@ const App: React.FC = () => {
           newGrid[randomIndex] = data;
           return newGrid;
         });
-        if (!isAuto) setLastEvent("New Pokémon appeared!");
+        if (!isAuto) setLastEvent("New Pokémon arrived!");
       }
     } catch (e) {
       console.error("Failed to spawn", e);
     }
   }, [grid]);
 
-  // Game Loop: Auto Spawn (Wild Encounters)
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      spawnPokemon(true);
-    }, SPAWN_INTERVAL_MS);
+  // REMOVED: Auto Spawn (Wild Encounters) useEffect
+  // Pokemon now only spawn when bought.
 
-    return () => clearInterval(intervalId);
-  }, [spawnPokemon]);
-
-  // Initial spawn
+  // Initial spawn - Keep this so the board isn't empty on load
   useEffect(() => {
     spawnPokemon(true);
-    setTimeout(() => spawnPokemon(true), 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -146,96 +135,118 @@ const App: React.FC = () => {
           setLoading(false);
         }
       } else {
-        setLastEvent("Max evolution reached!");
+        setLastEvent("Maximum Evolution!");
       }
     } else {
-      setLastEvent("Those Pokemon don't match!");
+      setLastEvent("Not a match!");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 font-sans select-none">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-sky-400 to-green-300 p-4 font-sans select-none overflow-hidden relative">
       
+      {/* Background Decor */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-green-600 to-green-400"></div>
+        {/* Clouds */}
+        <div className="absolute top-10 left-10 w-20 h-10 bg-white/40 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-20 right-20 w-32 h-12 bg-white/30 rounded-full blur-xl animate-pulse delay-700"></div>
+      </div>
+
       {/* Header */}
-      <div className="text-center mb-4 md:mb-6">
-        <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200 mb-2 drop-shadow-md">
-          PokéMerge
+      <div className="relative z-10 text-center mb-4">
+        <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)] tracking-tight">
+          Poké<span className="text-yellow-300">Ranch</span>
         </h1>
-        <p className="text-slate-400 text-sm md:text-base">
-          Drag identical Pokémon to evolve & earn Stones!
+        <p className="text-green-900 font-semibold text-sm md:text-base bg-white/30 backdrop-blur-sm py-1 px-4 rounded-full inline-block mt-2">
+          Collect, Merge, and Evolve your 3D Herd!
         </p>
       </div>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full max-w-2xl bg-slate-800/80 p-4 rounded-2xl border border-slate-700 shadow-xl backdrop-blur-sm">
+      <div className="relative z-10 grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 w-full max-w-2xl bg-white/80 p-4 rounded-3xl border-4 border-green-700/30 shadow-xl backdrop-blur-md">
         
         {/* Score */}
-        <div className="flex flex-col">
-          <span className="text-xs text-slate-400 uppercase tracking-widest">Score</span>
-          <span className="text-2xl font-bold text-white font-mono">{score.toLocaleString()}</span>
+        <div className="flex flex-col pl-2">
+          <span className="text-xs text-green-800 font-bold uppercase tracking-widest">Score</span>
+          <span className="text-2xl font-black text-green-900 font-mono">{score.toLocaleString()}</span>
         </div>
 
         {/* Evo Stones Economy */}
         <div className="flex flex-col md:items-center">
-           <span className="text-xs text-slate-400 uppercase tracking-widest flex items-center gap-1">
+           <span className="text-xs text-green-800 font-bold uppercase tracking-widest flex items-center gap-1">
              Evo Stones
-             <span className="text-emerald-400 text-[10px] animate-pulse">(+{incomeRate}/s)</span>
+             <span className="text-green-600 text-[10px] animate-pulse">(+{incomeRate}/s)</span>
            </span>
            <div className="flex items-center gap-2">
-             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/50 flex items-center justify-center text-[10px] border border-emerald-200">
+             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 shadow-lg flex items-center justify-center text-[10px] border border-white">
                💎
              </div>
-             <span className="text-2xl font-bold text-emerald-300 font-mono">{evoStones.toLocaleString()}</span>
+             <span className="text-2xl font-black text-purple-900 font-mono">{evoStones.toLocaleString()}</span>
            </div>
         </div>
 
         {/* Status Message */}
-        <div className="flex flex-col items-end col-span-2 md:col-span-1 md:items-end">
-           <span className="text-xs text-slate-400 uppercase tracking-widest">Status</span>
-           <span className="text-sm font-medium text-yellow-300 truncate w-full text-right animate-pulse">
+        <div className="flex flex-col items-end col-span-2 md:col-span-1 md:items-end pr-2">
+           <span className="text-xs text-green-800 font-bold uppercase tracking-widest">Ranch News</span>
+           <span className="text-sm font-bold text-orange-600 truncate w-full text-right animate-pulse">
              {loading ? 'Evolving...' : lastEvent}
            </span>
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-4 gap-2 md:gap-3 bg-slate-900/50 p-3 md:p-4 rounded-2xl border border-slate-700 shadow-2xl backdrop-blur-md mb-6">
-        {grid.map((item, index) => (
-          <GridCell 
-            key={index} 
-            index={index} 
-            item={item} 
-            onDrop={handleDrop} 
-          />
-        ))}
+      {/* 3D Grid Container */}
+      <div 
+        className="relative z-10 p-6 md:p-8 rounded-3xl bg-green-800/20 border-b-8 border-green-900/10 shadow-2xl backdrop-blur-sm mb-6 transition-all duration-500"
+        style={{
+            perspective: '1000px',
+        }}
+      >
+        <div 
+            className="grid grid-cols-4 gap-2 md:gap-4"
+            style={{
+                transform: 'rotateX(20deg)', // The 3D tilt
+                transformStyle: 'preserve-3d',
+            }}
+        >
+            {grid.map((item, index) => (
+            <GridCell 
+                key={index} 
+                index={index} 
+                item={item} 
+                onDrop={handleDrop} 
+            />
+            ))}
+        </div>
       </div>
 
       {/* Controls */}
-      <div className="flex gap-4">
+      <div className="relative z-10 flex gap-4">
         <button
           onClick={handleBuyPokeball}
           disabled={loading || evoStones < POKEBALL_COST}
           className="
             group relative
-            px-8 py-4 bg-gradient-to-b from-red-600 to-red-700 
-            hover:from-red-500 hover:to-red-600
-            active:from-red-700 active:to-red-800
+            px-8 py-4 bg-gradient-to-b from-red-500 to-red-600 
+            hover:from-red-400 hover:to-red-500
+            active:from-red-600 active:to-red-700
             text-white font-bold rounded-full 
-            shadow-lg shadow-red-900/50 transition-all 
+            shadow-[0_8px_0_0_rgb(153,27,27)] hover:shadow-[0_6px_0_0_rgb(153,27,27)] active:shadow-none
+            transition-all 
             disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
-            flex items-center gap-3 border-b-4 border-red-900
-            transform active:scale-95 active:border-b-0 active:translate-y-1
+            flex items-center gap-3 border-2 border-red-800
+            transform active:translate-y-2
           "
         >
-          {/* Pokeball Icon CSS */}
-          <div className="w-8 h-8 rounded-full bg-white border-2 border-slate-900 relative overflow-hidden flex items-center justify-center animate-bounce group-hover:animate-none">
-            <div className="absolute top-0 w-full h-1/2 bg-red-600 border-b-2 border-slate-900"></div>
-            <div className="w-2 h-2 rounded-full bg-white border-2 border-slate-900 z-10"></div>
+          {/* Pokeball Icon */}
+          <div className="w-10 h-10 rounded-full bg-white border-4 border-slate-900 relative overflow-hidden flex items-center justify-center animate-bounce group-hover:animate-spin">
+            <div className="absolute top-0 w-full h-1/2 bg-red-600 border-b-4 border-slate-900"></div>
+            <div className="w-3 h-3 rounded-full bg-white border-4 border-slate-900 z-10"></div>
           </div>
           
           <div className="flex flex-col items-start leading-tight">
-            <span className="uppercase text-xs text-red-100 font-semibold tracking-wider">Buy Poké Ball</span>
-            <span className="text-lg font-mono flex items-center gap-1">
+            <span className="uppercase text-xs text-red-100 font-bold tracking-wider text-shadow-sm">Order Delivery</span>
+            <span className="text-xl font-black font-mono flex items-center gap-1 text-white drop-shadow-md">
                {POKEBALL_COST} <span className="text-sm">💎</span>
             </span>
           </div>
@@ -243,9 +254,9 @@ const App: React.FC = () => {
       </div>
       
       {/* Footer Instructions */}
-      <div className="mt-8 text-center text-slate-500 text-xs opacity-60 hover:opacity-100 transition-opacity">
-        <p>Higher evolution stages generate more Evo Stones.</p>
-        <p>Bulbasaur + Bulbasaur = Ivysaur</p>
+      <div className="relative z-10 mt-8 text-center text-green-900/60 font-semibold text-xs hover:opacity-100 transition-opacity">
+        <p>Merge identical Pokémon to evolve.</p>
+        <p>Charizard + Charizard = Cyndaquil (Next Gen!)</p>
       </div>
 
     </div>
