@@ -18,4 +18,15 @@ export const SPAWNABLE_IDS = [1, 4, 7];
 
 export const GRID_SIZE = 4;
 export const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
-export const SPAWN_INTERVAL_MS = 3000;
+export const SPAWN_INTERVAL_MS = 5000; // Increased to make buying more relevant
+export const POKEBALL_COST = 50;
+
+// Income generation per pokemon ID (Stones per second)
+export const INCOME_MAP: Record<number, number> = {
+  // Tier 1 (1/sec)
+  1: 1, 4: 1, 7: 1,
+  // Tier 2 (4/sec)
+  2: 4, 5: 4, 8: 4,
+  // Tier 3 (12/sec)
+  3: 12, 6: 12, 9: 12
+};
