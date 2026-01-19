@@ -74,9 +74,6 @@ const App: React.FC = () => {
     }
   }, [grid]);
 
-  // REMOVED: Auto Spawn (Wild Encounters) useEffect
-  // Pokemon now only spawn when bought.
-
   // Initial spawn - Keep this so the board isn't empty on load
   useEffect(() => {
     spawnPokemon(true);
@@ -143,10 +140,10 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-sky-400 to-green-300 p-4 font-sans select-none overflow-hidden relative">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-sky-400 to-green-300 p-4 font-sans select-none relative">
       
       {/* Background Decor */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-green-600 to-green-400"></div>
         {/* Clouds */}
         <div className="absolute top-10 left-10 w-20 h-10 bg-white/40 rounded-full blur-xl animate-pulse"></div>
@@ -221,7 +218,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Controls */}
-      <div className="relative z-10 flex gap-4">
+      <div className="relative z-10 flex gap-4 mb-8">
         <button
           onClick={handleBuyPokeball}
           disabled={loading || evoStones < POKEBALL_COST}
@@ -245,7 +242,7 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex flex-col items-start leading-tight">
-            <span className="uppercase text-xs text-red-100 font-bold tracking-wider text-shadow-sm">Order Delivery</span>
+            <span className="uppercase text-xs text-red-100 font-bold tracking-wider text-shadow-sm">Buy Poké Ball</span>
             <span className="text-xl font-black font-mono flex items-center gap-1 text-white drop-shadow-md">
                {POKEBALL_COST} <span className="text-sm">💎</span>
             </span>
@@ -254,7 +251,7 @@ const App: React.FC = () => {
       </div>
       
       {/* Footer Instructions */}
-      <div className="relative z-10 mt-8 text-center text-green-900/60 font-semibold text-xs hover:opacity-100 transition-opacity">
+      <div className="relative z-10 pb-4 text-center text-green-900/60 font-semibold text-xs hover:opacity-100 transition-opacity">
         <p>Merge identical Pokémon to evolve.</p>
         <p>Charizard + Charizard = Cyndaquil (Next Gen!)</p>
       </div>
